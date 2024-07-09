@@ -1,0 +1,6 @@
+{
+  "exec": "ts-node ./src/app.ts",
+  "ext": "ts",
+  "ignore": ["src/control-panel/*"],
+  "watch": ["src"]
+}

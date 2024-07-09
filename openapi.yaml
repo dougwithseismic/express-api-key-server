@@ -1,0 +1,398 @@
+openapi: 3.1.0
+info:
+  title: API Key and License Management API
+  version: 1.0.0
+  description: API for managing API keys, credits, and licenses
+
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+  /keys:
+    post:
+      summary: Create a new API key
+      tags:
+        - API Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyDto'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /keys/{key}:
+    get:
+      summary: Get API key details
+      tags:
+        - API Keys
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      summary: Update API key
+      tags:
+        - API Keys
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyDto'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      summary: Deactivate API key
+      tags:
+        - API Keys
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /keys/{key}/add-credits:
+    post:
+      summary: Add credits to API key
+      tags:
+        - API Keys
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /licenses:
+    post:
+      summary: Create a new license
+      tags:
+        - Licenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLicenseDto'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /licenses/{id}:
+    get:
+      summary: Get license details
+      tags:
+        - Licenses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      summary: Update license
+      tags:
+        - Licenses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLicenseDto'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      summary: Revoke license
+      tags:
+        - Licenses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /licenses/by-api-key/{apiKeyId}:
+    get:
+      summary: Get licenses by API key
+      tags:
+        - Licenses
+      parameters:
+        - in: path
+          name: apiKeyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/License'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        credits:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        lastUsed:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+
+    CreateApiKeyDto:
+      type: object
+      required:
+        - userId
+        - credits
+      properties:
+        userId:
+          type: string
+          format: uuid
+        credits:
+          type: integer
+          minimum: 0
+        isActive:
+          type: boolean
+          default: true
+
+    UpdateApiKeyDto:
+      type: object
+      properties:
+        credits:
+          type: integer
+          minimum: 0
+        isActive:
+          type: boolean
+
+    License:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        apiKeyId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+
+    CreateLicenseDto:
+      type: object
+      required:
+        - apiKeyId
+        - productId
+        - expiresAt
+      properties:
+        apiKeyId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    UpdateLicenseDto:
+      type: object
+      properties:
+        productId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - ApiKeyAuth: []
